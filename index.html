@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galeria de Jogos — Turma 3B</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: #08050f;
+    color: #e2d8f0;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  .bg-grid {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-image:
+      linear-gradient(rgba(160,100,255,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(160,100,255,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .bg-glow-tr {
+    position: fixed;
+    top: -150px; right: -100px;
+    width: 650px; height: 550px;
+    background: radial-gradient(ellipse at center, rgba(120,60,240,0.22) 0%, transparent 68%);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .bg-glow-bl {
+    position: fixed;
+    bottom: -120px; left: -80px;
+    width: 550px; height: 450px;
+    background: radial-gradient(ellipse at center, rgba(90,30,200,0.14) 0%, transparent 68%);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .bg-glow-center {
+    position: fixed;
+    top: 30%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px; height: 300px;
+    background: radial-gradient(ellipse at center, rgba(100,40,220,0.07) 0%, transparent 70%);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 52px 24px 72px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 52px;
+  }
+
+  .logo-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px; height: 60px;
+    border: 1.5px solid rgba(160,100,255,0.45);
+    border-radius: 16px;
+    margin-bottom: 22px;
+    background: rgba(120,60,240,0.1);
+  }
+  .logo-icon svg { width: 30px; height: 30px; }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(22px, 4vw, 36px);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #fff;
+    text-transform: uppercase;
+  }
+  header p {
+    margin-top: 10px;
+    font-size: 13.5px;
+    color: rgba(200,170,255,0.45);
+    letter-spacing: 0.05em;
+  }
+
+  .divider {
+    width: 48px; height: 2px;
+    background: linear-gradient(90deg, rgba(160,100,255,0.0), rgba(160,100,255,0.7), rgba(160,100,255,0.0));
+    margin: 18px auto 0;
+    border-radius: 2px;
+  }
+
+  .professor-block {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 22px;
+    background: rgba(120,60,240,0.08);
+    border: 1px solid rgba(160,100,255,0.18);
+    border-radius: 10px;
+    padding: 8px 16px 8px 12px;
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .professor-block:hover {
+    background: rgba(120,60,240,0.16);
+    border-color: rgba(160,100,255,0.45);
+  }
+  .professor-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(200,170,255,0.35);
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+  }
+  .professor-name {
+    font-size: 13px;
+    color: rgba(220,200,255,0.75);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+  }
+  .professor-gh {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    color: rgba(160,100,255,0.7);
+    font-family: 'DM Sans', sans-serif;
+    margin-top: 1px;
+  }
+  .professor-gh svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+  /* ── Search ── */
+  .search-wrap {
+    max-width: 480px;
+    margin: 0 auto 12px;
+    position: relative;
+  }
+  .search-wrap input {
+    width: 100%;
+    background: rgba(120,60,240,0.07);
+    border: 1px solid rgba(160,100,255,0.2);
+    border-radius: 10px;
+    padding: 12px 16px 12px 44px;
+    color: #e2d8f0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-wrap input::placeholder { color: rgba(200,170,255,0.3); }
+  .search-wrap input:focus {
+    border-color: rgba(160,100,255,0.55);
+    box-shadow: 0 0 0 3px rgba(120,60,240,0.12);
+  }
+  .search-icon {
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.35;
+    color: #c8a0ff;
+  }
+  .clear-btn {
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(200,170,255,0.4);
+    font-size: 16px;
+    line-height: 1;
+    padding: 2px 4px;
+    display: none;
+    transition: color 0.15s;
+  }
+  .clear-btn:hover { color: rgba(200,170,255,0.9); }
+
+  .search-hints {
+    text-align: center;
+    font-size: 12px;
+    color: rgba(200,170,255,0.2);
+    margin-bottom: 28px;
+    letter-spacing: 0.04em;
+  }
+  .search-hints span {
+    display: inline-block;
+    background: rgba(120,60,240,0.12);
+    border: 1px solid rgba(160,100,255,0.15);
+    border-radius: 5px;
+    padding: 2px 7px;
+    margin: 0 3px;
+  }
+
+  .count {
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: rgba(200,170,255,0.3);
+    letter-spacing: 0.05em;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+    gap: 18px;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: rgba(18, 10, 32, 0.8);
+    border: 1px solid rgba(160,100,255,0.12);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(160,100,255,0.45);
+    box-shadow: 0 0 30px rgba(120,60,240,0.18), 0 0 0 1px rgba(160,100,255,0.12);
+  }
+
+  .card-thumb {
+    width: 100%;
+    aspect-ratio: 16/9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-thumb::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(160,100,255,0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(160,100,255,0.08) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+  .card-thumb-label {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 0 12px;
+  }
+  .card-num {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: rgba(120,60,240,0.2);
+    border: 1px solid rgba(160,100,255,0.35);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(200,160,255,0.9);
+    padding: 2px 8px;
+    letter-spacing: 0.05em;
+    z-index: 2;
+    font-family: 'Syne', sans-serif;
+  }
+
+  /* ── Card body ── */
+  .card-body {
+    padding: 14px 16px 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .card-game {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #f0e8ff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-author {
+    font-size: 12.5px;
+    color: rgba(200,170,255,0.45);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 12px;
+  }
+
+  /* ── Buttons inside card body ── */
+  .card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+  }
+
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 7px 0;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    border: 1px solid rgba(160,100,255,0.18);
+    background: transparent;
+    color: rgba(200,170,255,0.55);
+    font-family: 'DM Sans', sans-serif;
+    flex: 1;
+  }
+  .btn-icon:hover {
+    background: rgba(120,60,240,0.1);
+    color: rgba(220,190,255,0.9);
+    border-color: rgba(160,100,255,0.4);
+  }
+  .btn-icon.play {
+    border-color: rgba(160,100,255,0.4);
+    color: rgba(200,160,255,0.9);
+    background: rgba(120,60,240,0.1);
+  }
+  .btn-icon.play:hover {
+    background: rgba(120,60,240,0.22);
+    color: #e0c8ff;
+    border-color: rgba(180,120,255,0.6);
+  }
+  .btn-icon svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+  /* ── highlight match ── */
+  mark {
+    background: rgba(160,100,255,0.28);
+    color: #e8d8ff;
+    border-radius: 3px;
+    padding: 0 1px;
+  }
+
+  .empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 0;
+    color: rgba(200,170,255,0.25);
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow-tr"></div>
+<div class="bg-glow-bl"></div>
+<div class="bg-glow-center"></div>
+
+<div class="container">
+  <header>
+    <div class="logo-icon">
+      <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="3" width="11" height="11" rx="2.5" fill="rgba(160,100,255,0.65)"/>
+        <rect x="16" y="3" width="11" height="11" rx="2.5" fill="rgba(160,100,255,0.25)"/>
+        <rect x="3" y="16" width="11" height="11" rx="2.5" fill="rgba(160,100,255,0.25)"/>
+        <rect x="16" y="16" width="11" height="11" rx="2.5" fill="rgba(160,100,255,0.65)"/>
+      </svg>
+    </div>
+    <h1>Turma 3B — Galeria de Jogos</h1>
+    <p>SESI SENAI · Desenvolvimento de Jogos · 2025</p>
+    <div class="divider"></div>
+    <a class="professor-block" href="https://github.com/Prof-Carlos-Senai" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" fill="rgba(160,100,255,0.5)" xmlns="http://www.w3.org/2000/svg" width="28" height="28"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/></svg>
+      <div>
+        <div class="professor-label">Professor Orientador</div>
+        <div class="professor-name">Carlos Roberto da Silva Filho</div>
+        <div class="professor-gh">
+          <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          Prof-Carlos-Senai
+        </div>
+      </div>
+    </a>
+  </header>
+
+  <div class="search-wrap">
+    <svg class="search-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+      <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <input type="text" id="search" placeholder="Buscar por aluno, jogo ou número..." oninput="filterCards()" onkeydown="handleKey(event)">
+    <button class="clear-btn" id="clear-btn" onclick="clearSearch()" title="Limpar busca">✕</button>
+  </div>
+  <div class="search-hints">busque por <span>nome</span> <span>jogo</span> <span>#número</span></div>
+
+  <div class="count" id="count">31 jogos</div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<script>
+const students = [
+  { num: 1,  name: "Abel Silva Neto",                  game: "Baiacu The Game",         vercel: "https://baiacu-the-game.vercel.app/",                   github: "https://github.com/abelsilvaneto/baiacu_the_game" },
+  { num: 2,  name: "Bernardo Jacomelli Rodrigues",     game: "Arcane Rush",              vercel: "https://arcane-rush-nu.vercel.app/index.html",          github: "https://github.com/BernardoRodrigues2/Arcane_Rush.git" },
+  { num: 3,  name: "Clarice Heitmann",                 game: "Game Skate",               vercel: "https://game-skate-atualizado.vercel.app/",             github: "https://github.com/clariceheitmann/game_skate_atualizado.git" },
+  { num: 4,  name: "Davi Hames Airoso",                game: "Street Fut",               vercel: "https://street-fut.vercel.app/",                        github: "https://github.com/davidbillsiu/StreetFut" },
+  { num: 5,  name: "Davi Pereira Fagundes",            game: "Game Cavalo",              vercel: "https://game-cavalo.vercel.app/",                       github: "https://github.com/davipf273/game_cavalo" },
+  { num: 6,  name: "Eliel Bernardi",                   game: "Tijucas Truck Simulator",  vercel: "https://tijucas-truck-simulator.vercel.app/index.html", github: "https://github.com/eli-bernardi/tijucas_truck_simulator" },
+  { num: 7,  name: "Enzo dos Santos Hipólito",         game: "Game Indiana",             vercel: "https://game-indiana.vercel.app/",                      github: "https://github.com/EnzoHipolito/game-indiana" },
+  { num: 8,  name: "Evelin Piva",                      game: "Jogo Fada",                vercel: "https://jogo-fada.vercel.app/",                         github: "https://github.com/EvelinPiva/jogo_fada" },
+  { num: 9,  name: "Fábio José Trevisan",              game: "Pingui Run",               vercel: "https://pingui-run.vercel.app",                         github: "https://github.com/fabiotrevisan05/pingui_run.git" },
+  { num: 10, name: "Gabriela Mezzadri Rankel",         game: "Gato Faminto",             vercel: "https://gatofaminto.vercel.app/",                       github: "https://github.com/GabrielaRankel/jogo.git" },
+  { num: 11, name: "Guilherme Bello",                  game: "Jogo POO",                 vercel: "https://jogo-poo.vercel.app/",                          github: "https://github.com/Bellodev5/jogo-poo" },
+  { num: 12, name: "Guilherme Santos da Silva Rech",   game: "Jogo Ski",                 vercel: "https://jogo-ski.vercel.app/",                          github: "https://github.com/GuilhermeRech08/jogo_ski.git" },
+  { num: 13, name: "Henrique Vieira Justus",           game: "Space Evaders",            vercel: "https://space-evaders.vercel.app",                      github: "https://github.com/henrivj/space-evaders.git" },
+  { num: 14, name: "Jair Hyan Fernandes da Silva",     game: "Game Pablo",               vercel: "https://game-pablo.vercel.app/",                        github: "https://github.com/jairhy/game_pablo.git" },
+  { num: 15, name: "João Pedro Keidann",               game: "Cats n Cookies Run",       vercel: "https://catsncookiesrun.vercel.app/",                   github: "https://github.com/jpkeidann/jogo_carro_3b" },
+  { num: 16, name: "Juan Saragoza de Amorim",          game: "Cat Mania",                vercel: "https://catmania-terceiroano.vercel.app/",              github: "https://github.com/CurinthiaOMior/cat-mania" },
+  { num: 17, name: "Julia Zamarchi Monteiro",          game: "Jogo Corrida",             vercel: "https://jogo-corrida-two.vercel.app/",                  github: "https://github.com/zm-julia/jogo-corrida" },
+  { num: 18, name: "Larissa Bernardi",                 game: "Pequenas Patinhas",        vercel: "https://pequenas-patinhas.vercel.app/",                 github: "https://github.com/larssia/pequenas_patinhas2.git" },
+  { num: 19, name: "Luíza Michielin Reinhardt",        game: "Candy Rush",               vercel: "https://candyrush.vercel.app/",                         github: "https://github.com/luizamichielinreinhardt/Jogo_2026" },
+  { num: 20, name: "Mario Teodoro de Mello Biluk",     game: "Lab Escape",               vercel: "https://game-lab-escape-hbxf.vercel.app/",             github: "https://github.com/mariobiluk/LabEscapeGame" },
+  { num: 21, name: "Matheus Gomes Steingräber",        game: "Jomvet Scape",             vercel: "https://jomvet-scape.vercel.app/",                      github: "https://github.com/Twy1m/JomvetScape.git" },
+  { num: 22, name: "Matheus Orsi Reis",                game: "Game Foguete",             vercel: "https://game-foguete.vercel.app/",                      github: "https://github.com/MatheusOrsiReis/game_foguete" },
+  { num: 23, name: "Paula Ferreira Coutinho",          game: "Rat Catch",                vercel: "https://rat-catch.vercel.app/",                         github: "https://github.com/paulactnh/RatCatch" },
+  { num: 24, name: "Paulo Otávio Escobar Goulart",     game: "Poke Rush Run",            vercel: "https://poke-rush-run.vercel.app/",                     github: "https://github.com/otaviok9/PokeRush-Run" },
+  { num: 25, name: "Pedro Augusto Bechtold Theis",     game: "Fuel Survivor",            vercel: "https://fuel-survivor.vercel.app/",                     github: "https://github.com/pedrok9-dev/Fuel_Survivor" },
+  { num: 26, name: "Pedro Henrique Caldart Warmling",  game: "Jogo do Peixão",           vercel: "https://jogodopeixao.vercel.app/",                      github: "https://github.com/mendig0d0smares/jogo" },
+  { num: 27, name: "Pedro Henrique Krefta Duarte",     game: "Monkey Hunter",            vercel: "https://monkey-hunter.vercel.app/",                     github: "https://github.com/pedro-krefta/game_ind" },
+  { num: 28, name: "Pietro Francio de Miranda",        game: "Pane Neon",                vercel: "https://pane-neon.vercel.app/",                         github: "https://github.com/pietrofrancio/pane_neon" },
+  { num: 29, name: "Rafael Queiroz Logrado",           game: "Lab Escape",               vercel: "https://game-lab-escape-hbxf.vercel.app/",             github: "https://github.com/mariobiluk/LabEscapeGame" },
+  { num: 30, name: "Santiago Gabriel Fidmay",          game: "Air Battle 2D",            vercel: "https://air-battle-2-d.vercel.app/",                    github: "https://github.com/SantiagoFidmay/Air-Battle-2D.git" },
+  { num: 31, name: "Ueslei Souza de Carvalho Filho",   game: "Super Pooh Bear",          vercel: "https://super-pooh-bear.vercel.app/",                   github: "https://github.com/uesleisouza33/super_pooh_bear" },
+];
+
+const githubSVG = `<svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>`;
+const playSVG = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6.5"/><polygon points="6.5,5.5 11,8 6.5,10.5" fill="currentColor" stroke="none"/></svg>`;
+
+function thumbColors(name) {
+  let h = 0;
+  for (let c of name) h = (h * 31 + c.charCodeAt(0)) % 360;
+  const purple = (h + 260) % 360;
+  return { bg: `hsl(${purple},40%,10%)`, txt: `hsl(${purple},60%,62%)` };
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function highlight(str, q) {
+  if (!q) return escapeHtml(str);
+  const safe = escapeHtml(str);
+  const safeQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return safe.replace(new RegExp(`(${safeQ})`, 'gi'), '<mark>$1</mark>');
+}
+
+function buildCard(s, q = '') {
+  const { bg, txt } = thumbColors(s.name);
+  return `
+    <div class="card" data-search="${s.name.toLowerCase()} ${s.game.toLowerCase()} ${s.num}">
+      <div class="card-thumb" style="background:${bg}">
+        <span class="card-num">${String(s.num).padStart(2,'0')}</span>
+        <span class="card-thumb-label" style="color:${txt}">${escapeHtml(s.game)}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-game">${highlight(s.game, q)}</div>
+        <div class="card-author">${highlight(s.name, q)}</div>
+        <div class="card-actions">
+          <a class="btn-icon" href="${s.github}" target="_blank" rel="noopener" title="GitHub">
+            ${githubSVG} GitHub
+          </a>
+          <a class="btn-icon play" href="${s.vercel}" target="_blank" rel="noopener" title="Jogar">
+            ${playSVG} Jogar
+          </a>
+        </div>
+      </div>
+    </div>`;
+}
+
+function normalize(str) {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function filterCards() {
+  const raw = document.getElementById('search').value.trim();
+  const q = normalize(raw);
+  const clearBtn = document.getElementById('clear-btn');
+  clearBtn.style.display = raw ? 'block' : 'none';
+
+  // number search: #11 or just "11"
+  const numMatch = q.match(/^#?(\d+)$/);
+
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  let vis = 0;
+
+  students.forEach(s => {
+    let match = false;
+    if (!q) {
+      match = true;
+    } else if (numMatch) {
+      match = s.num === parseInt(numMatch[1], 10);
+    } else {
+      match = normalize(s.name).includes(q) || normalize(s.game).includes(q);
+    }
+    if (match) {
+      grid.insertAdjacentHTML('beforeend', buildCard(s, numMatch ? '' : raw));
+      vis++;
+    }
+  });
+
+  document.getElementById('count').textContent = vis === students.length
+    ? `${students.length} jogos`
+    : `${vis} de ${students.length} jogos`;
+
+  if (vis === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.textContent = 'Nenhum resultado encontrado.';
+    grid.appendChild(empty);
+  }
+}
+
+function clearSearch() {
+  document.getElementById('search').value = '';
+  filterCards();
+  document.getElementById('search').focus();
+}
+
+function handleKey(e) {
+  if (e.key === 'Escape') clearSearch();
+}
+
+// initial render
+document.getElementById('grid').innerHTML = students.map(s => buildCard(s)).join('');
+</script>
+</body>
+</html>
