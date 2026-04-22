@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Galeria de Jogos — Turma 3B</title>
+<link rel="shortcut icon" href="icon3b.png" type="image/x-icon">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -235,9 +236,36 @@
     box-shadow: 0 0 30px rgba(120,60,240,0.18), 0 0 0 1px rgba(160,100,255,0.12);
   }
 
+  /* ── Thumbnail com imagem ── */
   .card-thumb {
     width: 100%;
     aspect-ratio: 16/9;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* imagem real — ocupa tudo, object-fit cover */
+  .card-thumb img.thumb-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease, opacity 0.2s;
+    opacity: 0;
+  }
+  .card-thumb img.thumb-img.loaded {
+    opacity: 1;
+  }
+  .card:hover .card-thumb img.thumb-img.loaded {
+    transform: scale(1.04);
+  }
+
+  /* fallback — visível quando a imagem falha ou ainda carrega */
+  .card-thumb-fallback {
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -246,24 +274,18 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    position: relative;
-    overflow: hidden;
-  }
-  .card-thumb::before {
-    content: '';
-    position: absolute;
-    inset: 0;
     background-image:
       linear-gradient(rgba(160,100,255,0.08) 1px, transparent 1px),
       linear-gradient(90deg, rgba(160,100,255,0.08) 1px, transparent 1px);
     background-size: 30px 30px;
+    transition: opacity 0.2s;
   }
-  .card-thumb-label {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    padding: 0 12px;
+  /* quando imagem carregou, esconde o fallback */
+  .card-thumb img.thumb-img.loaded ~ .card-thumb-fallback {
+    opacity: 0;
+    pointer-events: none;
   }
+
   .card-num {
     position: absolute;
     top: 10px; left: 10px;
@@ -305,47 +327,35 @@
     margin-bottom: 12px;
   }
 
-  /* ── Buttons inside card body ── */
+  /* ── Botão jogar (único) ── */
   .card-actions {
-    display: flex;
-    gap: 8px;
     margin-top: auto;
   }
 
-  .btn-icon {
-    display: inline-flex;
+  .btn-play {
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
-    padding: 7px 0;
+    gap: 6px;
+    width: 100%;
+    padding: 9px 0;
     border-radius: 8px;
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 500;
     cursor: pointer;
     text-decoration: none;
     transition: background 0.15s, color 0.15s, border-color 0.15s;
-    border: 1px solid rgba(160,100,255,0.18);
-    background: transparent;
-    color: rgba(200,170,255,0.55);
-    font-family: 'DM Sans', sans-serif;
-    flex: 1;
-  }
-  .btn-icon:hover {
-    background: rgba(120,60,240,0.1);
-    color: rgba(220,190,255,0.9);
-    border-color: rgba(160,100,255,0.4);
-  }
-  .btn-icon.play {
-    border-color: rgba(160,100,255,0.4);
+    border: 1px solid rgba(160,100,255,0.4);
     color: rgba(200,160,255,0.9);
     background: rgba(120,60,240,0.1);
+    font-family: 'DM Sans', sans-serif;
   }
-  .btn-icon.play:hover {
-    background: rgba(120,60,240,0.22);
+  .btn-play:hover {
+    background: rgba(120,60,240,0.25);
     color: #e0c8ff;
-    border-color: rgba(180,120,255,0.6);
+    border-color: rgba(180,120,255,0.65);
   }
-  .btn-icon svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .btn-play svg { width: 13px; height: 13px; flex-shrink: 0; }
 
   /* ── highlight match ── */
   mark {
@@ -362,6 +372,26 @@
     color: rgba(200,170,255,0.25);
     font-size: 14px;
   }
+
+  /* ── Banner animado ── */
+  .banner-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .banner-wrap img {
+    max-width: min(280px, 90vw);
+    height: auto;
+    animation: bannerFloat 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 18px rgba(140,70,255,0.35));
+    will-change: transform;
+  }
+  @keyframes bannerFloat {
+    0%   { transform: translateY(0px) rotate(-0.4deg) scale(1); }
+    30%  { transform: translateY(-8px) rotate(0.3deg) scale(1.012); }
+    60%  { transform: translateY(-4px) rotate(-0.2deg) scale(1.006); }
+    100% { transform: translateY(0px) rotate(-0.4deg) scale(1); }
+  }
 </style>
 </head>
 <body>
@@ -373,16 +403,11 @@
 
 <div class="container">
   <header>
-    <div class="logo-icon">
-      <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="3" width="11" height="11" rx="2.5" fill="rgba(160,100,255,0.65)"/>
-        <rect x="16" y="3" width="11" height="11" rx="2.5" fill="rgba(160,100,255,0.25)"/>
-        <rect x="3" y="16" width="11" height="11" rx="2.5" fill="rgba(160,100,255,0.25)"/>
-        <rect x="16" y="16" width="11" height="11" rx="2.5" fill="rgba(160,100,255,0.65)"/>
-      </svg>
+    <div class="banner-wrap">
+      <img src="icon3b.png" alt="Terceirão 3B">
     </div>
-    <h1>Turma 3B — Galeria de Jogos</h1>
-    <p>SESI SENAI · Desenvolvimento de Jogos · 2025</p>
+    <h1>Galeria de Jogos</h1>
+    <p>SESI SENAI Tijucas · Técnico em Desenvolvimento de Sistemas · Turma 2024 - 2026</p>
     <div class="divider"></div>
     <a class="professor-block" href="https://github.com/Prof-Carlos-Senai" target="_blank" rel="noopener">
       <svg viewBox="0 0 16 16" fill="rgba(160,100,255,0.5)" xmlns="http://www.w3.org/2000/svg" width="28" height="28"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/></svg>
@@ -405,7 +430,7 @@
     <input type="text" id="search" placeholder="Buscar por aluno, jogo ou número..." oninput="filterCards()" onkeydown="handleKey(event)">
     <button class="clear-btn" id="clear-btn" onclick="clearSearch()" title="Limpar busca">✕</button>
   </div>
-  <div class="search-hints">busque por <span>nome</span> <span>jogo</span> <span>#número</span></div>
+  <div class="search-hints"> <span>nome</span> <span>jogo</span> <span>#número</span></div>
 
   <div class="count" id="count">31 jogos</div>
   <div class="grid" id="grid"></div>
@@ -413,40 +438,39 @@
 
 <script>
 const students = [
-  { num: 1,  name: "Abel Silva Neto",                  game: "Baiacu The Game",         vercel: "https://baiacu-the-game.vercel.app/",                   github: "https://github.com/abelsilvaneto/baiacu_the_game" },
-  { num: 2,  name: "Bernardo Jacomelli Rodrigues",     game: "Arcane Rush",              vercel: "https://arcane-rush-nu.vercel.app/index.html",          github: "https://github.com/BernardoRodrigues2/Arcane_Rush.git" },
-  { num: 3,  name: "Clarice Heitmann",                 game: "Game Skate",               vercel: "https://game-skate-atualizado.vercel.app/",             github: "https://github.com/clariceheitmann/game_skate_atualizado.git" },
-  { num: 4,  name: "Davi Hames Airoso",                game: "Street Fut",               vercel: "https://street-fut.vercel.app/",                        github: "https://github.com/davidbillsiu/StreetFut" },
-  { num: 5,  name: "Davi Pereira Fagundes",            game: "Game Cavalo",              vercel: "https://game-cavalo.vercel.app/",                       github: "https://github.com/davipf273/game_cavalo" },
-  { num: 6,  name: "Eliel Bernardi",                   game: "Tijucas Truck Simulator",  vercel: "https://tijucas-truck-simulator.vercel.app/index.html", github: "https://github.com/eli-bernardi/tijucas_truck_simulator" },
-  { num: 7,  name: "Enzo dos Santos Hipólito",         game: "Game Indiana",             vercel: "https://game-indiana.vercel.app/",                      github: "https://github.com/EnzoHipolito/game-indiana" },
-  { num: 8,  name: "Evelin Piva",                      game: "Jogo Fada",                vercel: "https://jogo-fada.vercel.app/",                         github: "https://github.com/EvelinPiva/jogo_fada" },
-  { num: 9,  name: "Fábio José Trevisan",              game: "Pingui Run",               vercel: "https://pingui-run.vercel.app",                         github: "https://github.com/fabiotrevisan05/pingui_run.git" },
-  { num: 10, name: "Gabriela Mezzadri Rankel",         game: "Gato Faminto",             vercel: "https://gatofaminto.vercel.app/",                       github: "https://github.com/GabrielaRankel/jogo.git" },
-  { num: 11, name: "Guilherme Bello",                  game: "Jogo POO",                 vercel: "https://jogo-poo.vercel.app/",                          github: "https://github.com/Bellodev5/jogo-poo" },
-  { num: 12, name: "Guilherme Santos da Silva Rech",   game: "Jogo Ski",                 vercel: "https://jogo-ski.vercel.app/",                          github: "https://github.com/GuilhermeRech08/jogo_ski.git" },
-  { num: 13, name: "Henrique Vieira Justus",           game: "Space Evaders",            vercel: "https://space-evaders.vercel.app",                      github: "https://github.com/henrivj/space-evaders.git" },
-  { num: 14, name: "Jair Hyan Fernandes da Silva",     game: "Game Pablo",               vercel: "https://game-pablo.vercel.app/",                        github: "https://github.com/jairhy/game_pablo.git" },
-  { num: 15, name: "João Pedro Keidann",               game: "Cats n Cookies Run",       vercel: "https://catsncookiesrun.vercel.app/",                   github: "https://github.com/jpkeidann/jogo_carro_3b" },
-  { num: 16, name: "Juan Saragoza de Amorim",          game: "Cat Mania",                vercel: "https://catmania-terceiroano.vercel.app/",              github: "https://github.com/CurinthiaOMior/cat-mania" },
-  { num: 17, name: "Julia Zamarchi Monteiro",          game: "Jogo Corrida",             vercel: "https://jogo-corrida-two.vercel.app/",                  github: "https://github.com/zm-julia/jogo-corrida" },
-  { num: 18, name: "Larissa Bernardi",                 game: "Pequenas Patinhas",        vercel: "https://pequenas-patinhas.vercel.app/",                 github: "https://github.com/larssia/pequenas_patinhas2.git" },
-  { num: 19, name: "Luíza Michielin Reinhardt",        game: "Candy Rush",               vercel: "https://candyrush.vercel.app/",                         github: "https://github.com/luizamichielinreinhardt/Jogo_2026" },
-  { num: 20, name: "Mario Teodoro de Mello Biluk",     game: "Lab Escape",               vercel: "https://game-lab-escape-hbxf.vercel.app/",             github: "https://github.com/mariobiluk/LabEscapeGame" },
-  { num: 21, name: "Matheus Gomes Steingräber",        game: "Jomvet Scape",             vercel: "https://jomvet-scape.vercel.app/",                      github: "https://github.com/Twy1m/JomvetScape.git" },
-  { num: 22, name: "Matheus Orsi Reis",                game: "Game Foguete",             vercel: "https://game-foguete.vercel.app/",                      github: "https://github.com/MatheusOrsiReis/game_foguete" },
-  { num: 23, name: "Paula Ferreira Coutinho",          game: "Rat Catch",                vercel: "https://rat-catch.vercel.app/",                         github: "https://github.com/paulactnh/RatCatch" },
-  { num: 24, name: "Paulo Otávio Escobar Goulart",     game: "Poke Rush Run",            vercel: "https://poke-rush-run.vercel.app/",                     github: "https://github.com/otaviok9/PokeRush-Run" },
-  { num: 25, name: "Pedro Augusto Bechtold Theis",     game: "Fuel Survivor",            vercel: "https://fuel-survivor.vercel.app/",                     github: "https://github.com/pedrok9-dev/Fuel_Survivor" },
-  { num: 26, name: "Pedro Henrique Caldart Warmling",  game: "Jogo do Peixão",           vercel: "https://jogodopeixao.vercel.app/",                      github: "https://github.com/mendig0d0smares/jogo" },
-  { num: 27, name: "Pedro Henrique Krefta Duarte",     game: "Monkey Hunter",            vercel: "https://monkey-hunter.vercel.app/",                     github: "https://github.com/pedro-krefta/game_ind" },
-  { num: 28, name: "Pietro Francio de Miranda",        game: "Pane Neon",                vercel: "https://pane-neon.vercel.app/",                         github: "https://github.com/pietrofrancio/pane_neon" },
-  { num: 29, name: "Rafael Queiroz Logrado",           game: "Lab Escape",               vercel: "https://game-lab-escape-hbxf.vercel.app/",             github: "https://github.com/mariobiluk/LabEscapeGame" },
-  { num: 30, name: "Santiago Gabriel Fidmay",          game: "Air Battle 2D",            vercel: "https://air-battle-2-d.vercel.app/",                    github: "https://github.com/SantiagoFidmay/Air-Battle-2D.git" },
-  { num: 31, name: "Ueslei Souza de Carvalho Filho",   game: "Super Pooh Bear",          vercel: "https://super-pooh-bear.vercel.app/",                   github: "https://github.com/uesleisouza33/super_pooh_bear" },
+  { num: 1,  name: "Abel Silva Neto",                  game: "Baiacu The Game",         vercel: "https://baiacu-the-game.vercel.app/" },
+  { num: 2,  name: "Bernardo Jacomelli Rodrigues",     game: "Arcane Rush",              vercel: "https://arcane-rush-nu.vercel.app/index.html" },
+  { num: 3,  name: "Clarice Heitmann",                 game: "Game Skate",               vercel: "https://game-skate-atualizado.vercel.app/" },
+  { num: 4,  name: "Davi Hames Airoso",                game: "Street Fut",               vercel: "https://street-fut.vercel.app/" },
+  { num: 5,  name: "Davi Pereira Fagundes",            game: "Game Cavalo",              vercel: "https://game-cavalo.vercel.app/" },
+  { num: 6,  name: "Eliel Bernardi",                   game: "Tijucas Truck Simulator",  vercel: "https://tijucas-truck-simulator.vercel.app/index.html" },
+  { num: 7,  name: "Enzo dos Santos Hipólito",         game: "Game Indiana",             vercel: "https://game-indiana.vercel.app/" },
+  { num: 8,  name: "Evelin Piva",                      game: "Jogo Fada",                vercel: "https://jogo-fada.vercel.app/" },
+  { num: 9,  name: "Fábio José Trevisan",              game: "Pingui Run",               vercel: "https://pingui-run.vercel.app" },
+  { num: 10, name: "Gabriela Mezzadri Rankel",         game: "Gato Faminto",             vercel: "https://gatofaminto.vercel.app/" },
+  { num: 11, name: "Guilherme Bello",                  game: "Jogo POO",                 vercel: "https://jogo-poo.vercel.app/" },
+  { num: 12, name: "Guilherme Santos da Silva Rech",   game: "Jogo Ski",                 vercel: "https://jogo-ski.vercel.app/" },
+  { num: 13, name: "Henrique Vieira Justus",           game: "Space Evaders",            vercel: "https://space-evaders.vercel.app" },
+  { num: 14, name: "Jair Hyan Fernandes da Silva",     game: "Game Pablo",               vercel: "https://game-pablo.vercel.app/" },
+  { num: 15, name: "João Pedro Keidann",               game: "Cats n Cookies Run",       vercel: "https://catsncookiesrun.vercel.app/" },
+  { num: 16, name: "Juan Saragoza de Amorim",          game: "Cat Mania",                vercel: "https://catmania-terceiroano.vercel.app/" },
+  { num: 17, name: "Julia Zamarchi Monteiro",          game: "Jogo Corrida",             vercel: "https://jogo-corrida-two.vercel.app/" },
+  { num: 18, name: "Larissa Bernardi",                 game: "Pequenas Patinhas",        vercel: "https://pequenas-patinhas.vercel.app/" },
+  { num: 19, name: "Luíza Michielin Reinhardt",        game: "Candy Rush",               vercel: "https://candyrush.vercel.app/" },
+  { num: 20, name: "Mario Teodoro de Mello Biluk",     game: "Lab Escape",               vercel: "https://game-lab-escape-hbxf.vercel.app/" },
+  { num: 21, name: "Matheus Gomes Steingräber",        game: "Jomvet Scape",             vercel: "https://jomvet-scape.vercel.app/" },
+  { num: 22, name: "Matheus Orsi Reis",                game: "Game Foguete",             vercel: "https://game-foguete.vercel.app/" },
+  { num: 23, name: "Paula Ferreira Coutinho",          game: "Rat Catch",                vercel: "https://rat-catch.vercel.app/" },
+  { num: 24, name: "Paulo Otávio Escobar Goulart",     game: "Poke Rush Run",            vercel: "https://poke-rush-run.vercel.app/" },
+  { num: 25, name: "Pedro Augusto Bechtold Theis",     game: "Fuel Survivor",            vercel: "https://fuel-survivor.vercel.app/" },
+  { num: 26, name: "Pedro Henrique Caldart Warmling",  game: "Jogo do Peixão",           vercel: "https://jogodopeixao.vercel.app/" },
+  { num: 27, name: "Pedro Henrique Krefta Duarte",     game: "Monkey Hunter",            vercel: "https://monkey-hunter.vercel.app/" },
+  { num: 28, name: "Pietro Francio de Miranda",        game: "Pane Neon",                vercel: "https://pane-neon.vercel.app/" },
+  { num: 29, name: "Rafael Queiroz Logrado",           game: "Space Invasion",           vercel: "https://space-invasion-raf.vercel.app/" },
+  { num: 30, name: "Santiago Gabriel Fidmay",          game: "Air Battle 2D",            vercel: "https://air-battle-2-d.vercel.app/" },
+  { num: 31, name: "Ueslei Souza de Carvalho Filho",   game: "Super Pooh Bear",          vercel: "https://super-pooh-bear.vercel.app/" },
 ];
 
-const githubSVG = `<svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>`;
 const playSVG = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6.5"/><polygon points="6.5,5.5 11,8 6.5,10.5" fill="currentColor" stroke="none"/></svg>`;
 
 function thumbColors(name) {
@@ -469,20 +493,28 @@ function highlight(str, q) {
 
 function buildCard(s, q = '') {
   const { bg, txt } = thumbColors(s.name);
+  const imgPath = `img/img${s.num}.png`;
+
   return `
     <div class="card" data-search="${s.name.toLowerCase()} ${s.game.toLowerCase()} ${s.num}">
       <div class="card-thumb" style="background:${bg}">
         <span class="card-num">${String(s.num).padStart(2,'0')}</span>
-        <span class="card-thumb-label" style="color:${txt}">${escapeHtml(s.game)}</span>
+        <img
+          class="thumb-img"
+          src="${imgPath}"
+          alt="${escapeHtml(s.game)}"
+          onload="this.classList.add('loaded')"
+          onerror="this.style.display='none'"
+        >
+        <div class="card-thumb-fallback" style="background-color:${bg}">
+          <span style="color:${txt};text-align:center;padding:0 12px">${escapeHtml(s.game)}</span>
+        </div>
       </div>
       <div class="card-body">
         <div class="card-game">${highlight(s.game, q)}</div>
         <div class="card-author">${highlight(s.name, q)}</div>
         <div class="card-actions">
-          <a class="btn-icon" href="${s.github}" target="_blank" rel="noopener" title="GitHub">
-            ${githubSVG} GitHub
-          </a>
-          <a class="btn-icon play" href="${s.vercel}" target="_blank" rel="noopener" title="Jogar">
+          <a class="btn-play" href="${s.vercel}" target="_blank" rel="noopener" title="Jogar">
             ${playSVG} Jogar
           </a>
         </div>
@@ -500,7 +532,6 @@ function filterCards() {
   const clearBtn = document.getElementById('clear-btn');
   clearBtn.style.display = raw ? 'block' : 'none';
 
-  // number search: #11 or just "11"
   const numMatch = q.match(/^#?(\d+)$/);
 
   const grid = document.getElementById('grid');
@@ -544,8 +575,25 @@ function handleKey(e) {
   if (e.key === 'Escape') clearSearch();
 }
 
-// initial render
 document.getElementById('grid').innerHTML = students.map(s => buildCard(s)).join('');
+
+
 </script>
+<footer style="text-align:center;padding:32px 0 48px;color:rgba(200,170,255,0.3);font-family:'DM Sans',sans-serif;font-size:13px;letter-spacing:0.04em;">
+  Desenvolvido por
+  <a href="https://github.com/Bellodev5" target="_blank" rel="noopener"
+     style="color:rgba(160,100,255,0.7);text-decoration:none;margin-left:4px;transition:color 0.2s;"
+     onmouseover="this.style.color='rgba(200,150,255,1)'"
+     onmouseout="this.style.color='rgba(160,100,255,0.7)'">
+    Guilherme Bello 
+  </a>
+  e
+  <a href="https://github.com/uesleisouza33" target="_blank" rel="noopener"
+     style="color:rgba(160,100,255,0.7);text-decoration:none;margin-left:4px;transition:color 0.2s;"
+     onmouseover="this.style.color='rgba(200,150,255,1)'"
+     onmouseout="this.style.color='rgba(160,100,255,0.7)'">
+  Ueslei Carvalho 
+  </a>
+</footer>
 </body>
 </html>
